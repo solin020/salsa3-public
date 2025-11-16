@@ -174,6 +174,15 @@ In addition, the following information was supplied
 - your publicly routable internet domain name
 - the port the docker container is being served on (I recommend 443). 
 
+for twilio to forward incoming calls to your SALSA installation,
+you need to ensure that 'A call comes in' is configured to an HTTP POST webhook
+in your twilio dashboard for your number using a URL such as 
+
+https://your.domain.net/salsa/twilio/inbound-call?twilio_info=your-twilio-info-name&project=your-project
+
+With the twilio_info and project query params set to the twilio_info nickname and project name
+in the database which has been linked to twilio.
+
 For your salsa3 installation to be accessible both to the app or to Twilio,
 it is necessary that you get yourself a domain name and an SSL certificate for HTTPS so that your installation can be reached on the public internet. Here is a discussion on how to do that: 
 https://webmasters.stackexchange.com/questions/89143/can-i-make-my-site-available-world-wide-without-renting-a-hosting-server
