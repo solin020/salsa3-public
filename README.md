@@ -43,7 +43,18 @@ Run
 `cp /pg_hba.conf /var/lib/postgresql/data/pg_hba.conf`
 `cp /postgresql.conf /var/lib/postgresql/data/postgresql.conf`
 
-Edit /postgresql.conf
+Edit /.pgpass
+
+Its contents should look like this:
+
+/var/run/postgresql:5432:salsa:salsa_root:superuser_password
+
+change 'superuser_password' to the appropriate salsa_root password you specified earlier 
+
+Now run `cp /.pgpass /var/lib/postgresql/data/.pgpass`
+Now run `chmod 600 /var/lib/postgresql/data/.pgpass`
+Now run `chown postgres /var/lib/postgresql/data/.pgpass`
+
 Find the line
 cron.database_name = cron.database_name = 'postgresql://salsa_root:superuser_password@%2Fvar%2Frun%2Fpostgresql/salsa'
 And replace the superuser_password part with the password you set for salsa_root in the preceding step (you will have to URL-encode the password if it uses URL-incompatible characters)
