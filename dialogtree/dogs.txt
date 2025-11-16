@@ -1,0 +1,4 @@
+German Shepherd, allergenic, outdoor
+Standard Poodle, hypoallergenic, outdoor
+Maltese, hypoallergenic, indoor
+Corgi, allergenic, indoor

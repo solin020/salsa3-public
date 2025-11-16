@@ -1,0 +1,24 @@
+Install gpg on your device
+create a public and private key pair for yourself
+Use this command
+gpg --full-generate-key
+
+
+
+Get the apparmor format of the public key
+Use this command:
+gpg --armor --export (yourkeyname)
+
+
+
+
+insert that format into your code which encrypts the zip
+See if you can decrypt the output on your own device
+
+gpg --pinentry-mode=loopback --passphrase "{gpg_phassphrase_for_key_you_created_ealier}" -d -o "{filename_to_save_your_zip_to}" "{encrypted_file_name}"
+
+See if you can unzip the resulting decrypted file
+See if the unzipped version of the decrypted file is a directory
+See if it contains an audio file
+See if you can play the audio file
+See if the file sounds right

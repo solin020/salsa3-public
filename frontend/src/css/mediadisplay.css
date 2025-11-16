@@ -1,0 +1,10 @@
+.j_mediadisplay {
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+.j_media{
+    grid-row: 2 / 3;
+}
+.j_mediainput{
+    grid-row: 1 / 2;
+}

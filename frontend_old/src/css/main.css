@@ -1,0 +1,110 @@
+.j_divider{
+    height: 2px;
+    background-color: #3e648d;
+}
+.j-tooltip{
+    font-size:20pt;
+    color:blue;
+    font-weight:bold;
+}
+:root{
+    --salsablue: linear-gradient(#6d94bf, #446e9b, #3e648d);
+}
+
+.j-input{
+    width: 600px;
+}
+
+
+.j-angle{
+    color: grey;
+    font-size: 20pt;
+}
+.j-displaycrumb{
+    color: blue;
+    font-size: 20pt;
+    text-decoration: underline;
+    &:hover{
+        color:darkblue;
+    }
+    &.j-activecrumb{
+        font-weight:bold;
+        color:black;
+    }
+}
+.j-crumbadvance{
+  clear: both;
+  bottom: 0px;
+  margin-right: auto;
+  margin-left: auto;
+  width: 150pt;
+  left: 0px;
+  right: 0px;
+
+
+}
+
+.j-crumbbutton{
+  &:enabled{
+    background-image: var(--salsablue);
+    color: white;
+  }
+  &:disabled{
+    background-color: lightgrey;
+    color: darkgrey;
+  }
+}
+
+
+
+.button-7 {
+  border: 1px solid transparent;
+  border-radius: 3px;
+  box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;
+  box-sizing: border-box;
+  font-family: -apple-system,system-ui,"Segoe UI","Liberation Sans",sans-serif;
+  font-size: 20pt;
+  font-weight: 400;
+  line-height: 1.15385;
+  margin-left: auto;
+  margin-right: auto;
+  outline: none;
+  padding: 8px .8em;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: baseline;
+  white-space: nowrap;
+  &:enabled{
+    box-shadow: none;
+    cursor: pointer;
+    &:hover{
+      box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);
+    }
+  }
+}
+
+input[type=number], input[type=checkbox], input[type=radio]{
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+
+.j_phone_sim{
+  width: 380px;
+  height:660px;
+  border-bottom: solid black 10px;
+  border-top: solid black 10px;
+  border-left: solid black 3px;
+  border-right: solid black 3px;
+  border-radius: 30px;
+  background-color: white;
+  padding: 30px;
+}
+
+.j-generic-popup{
+  height: 600px;
+  width: 600px;
+}

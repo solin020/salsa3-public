@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dialogtree SYSTEM "./dialogtree2.dtd">
+<dialogtree>
+  <say>
+      Hi! I can answer questions about your prescriptions. 
+  </say>
+  <branch label="start">
+    <choice>
+        <consult-llm>
+            <chatml role="system">
+        You are a pharmaceutical assistant who answers a patient's basic questions
+        about the prescription medications they are on, listed in their chart here:
+        <context>prescriptions</context>
+        If the patient asked a basic question about what their prescriptions are
+        or how to take them, reply "basic". If the patient instead asked
+        a more advanced question about safety or side effects that would require
+        consulting the documents their clinician has provided them, reply "documents". 
+        If answering the question would require some calculations, reply "calculations".
+        Otherwise, reply "other". Reply with only one word.
+            </chatml>
+            <chatml role="question">
+        <listen/>
+            </chatml>
+            <chatml role="answer"/>
+        </consult-llm>
+    </choice>
+    <match choices="basic">
+        <goto>basic</goto>
+    </match>
+    <match choices="documents">
+        <goto>documents</goto>
+    </match>
+    <match choices="calculations">
+        <goto>nomath</goto>
+    </match>
+    <say>
+        <consult-llm>
+            <chatml role="system">
+            You are a pharmaceutical assistant who answers a patient's basic questions
+            about the prescription medications they are on. They have
+            asked you a question irrelevant to their prescription medications.
+            Politely explain that you can only answer questions relating
+            to their prescription medications.
+            </chatml>
+            <chatml role="question">
+            <last-user-statement/>
+            </chatml>
+        </consult-llm>
+    </say>
+    <retry/>
+  </branch>
+  <say>Do you have any other questions for me?</say>
+  <branch label="restart">
+    <choice>
+        <consult-llm>
+            <chatml role="system">
+            You are a pharmaceutical assistant who answers a patient's basic questions
+            about the prescription medications they are on, listed in their chart here:
+            <context>prescriptions</context>
+            If the patient asked a basic question about what their prescriptions are
+            or how to take them, reply "basic". If the patient instead asked
+            a more advanced question about safety or side effects that would require
+            consulting the documents their clinician has provided them, reply "documents".
+            If answering the question would require some calculations, reply "calculations".
+            If the patient said something like goodbye or that they don't have any other questions,
+            say "goodbye".
+            Otherwise, reply "other". Reply with only one word.
+            </chatml>
+            <chatml role="question">
+            <listen/>
+            </chatml>
+        </consult-llm>
+    </choice>
+    <match choices="basic">
+        <goto>basic</goto>
+    </match>
+    <match choices="documents">
+        <goto>documents</goto>
+    </match>
+    <match choices="goodbye"><goto>end</goto></match>
+    <match choices="calculations"><goto>nomath</goto></match>
+    <say>
+        <consult-llm>
+            <chatml role="system">
+            You are a pharmaceutical assistant who answers a patient's basic questions
+            about the prescription medications they are on. They have
+            asked you a question irrelevant to their prescription medications.
+            Politely explain that you can only answer questions relating
+            to their prescription medications.
+            </chatml>
+            <chatml role="question">
+            <last-user-statement/>
+            </chatml>
+        </consult-llm>
+    </say>
+    <retry/>
+  </branch>
+  <say label="nomath">
+Unfortunately, I am unable to make accurate mathematical calculations and I can't help with questions which require them.
+  </say>
+  <goto>restart</goto>
+  <say label="basic">
+      <consult-llm>
+            <chatml role="system">
+      You are a pharmaceutical assistant who answers a patient's basic questions
+      about the prescription medications they are on, listed in their chart here:
+            <context>prescriptions</context>
+            </chatml>
+            <chatml role="question">
+      <last-user-statement/>
+            </chatml>
+            <chatml role="system">
+      Answer the patients question using 6th grade level English to the best of your ability. Always refer
+      to your patient in the second person. Be brief. If the user asks a question about dosages, 
+      or any other questions that require a calculation, 
+      answer that you are not able to preform calculations and will not be able to answer this question, and instead say:
+      "Dosaging is critical to patient safety, please direct your dosage questions to your physician rather than me."
+      Refer to medications in plain terms a layman would understand, instead of
+      the detailed names they are given in the patient's chart.
+            </chatml>
+      </consult-llm>
+  </say>
+  <goto>restart</goto>
+  <say label="documents">
+I will read through the documents your provider has uploaded to your portal to help answer your question. 
+Please be patient, as this takes a while.
+
+  </say>
+  <goto>
+      <run>
+          <![CDATA[
+          context["documents_copy"] = [d for d in context["documents"]]
+          context["current_document"] = context["documents_copy"].pop()
+          if len(context["documents_copy"]) < 1:
+              return "documentloopend"
+          else:
+              return "documentloopstart"
+          ]]>
+      </run>
+  </goto>
+  <say label="documentloopstart">
+    <consult-llm>
+        <chatml role="system">
+        You are a pharmaceutical assistant who answers a patient's basic questions
+        about the prescriptions.
+        Here is one of the patient's prescription handouts to help the patient answer their question:
+        <context>current_document</context>
+        </chatml>
+        <chatml role="question">
+        <last-user-statement/>
+        </chatml>
+        <chatml role="system">
+        State "From looking at the documents your clinician provided you on {{topic}}, ...", and then, if it contains helpful information, your answer, otherwise, simply state
+        with brief language you have finished reading it. Then state that you will continue reviewing
+        their documents. 
+        If the user asks a question about dosages, or any other questions that require a calculation, 
+        answer that you are not able to preform calculations and will not be able to answer this question, and instead say:
+        "Dosaging is critical to patient safety, please direct your dosage questions to your physician rather than me."
+        Give complete answers.
+        Refer to medications in plain terms a layman would understand, instead of
+        the detailed names they are given in the patient's chart.
+        Answer the patients question completely using 6th grade level English to the best of your ability. Always refer
+        to your patient in the second person. Be brief. Refer to medications in plain terms a layman would understand, instead of
+        the detailed names they are given in the patient's chart.
+        </chatml>
+    </consult-llm>
+  </say>
+  <goto>
+    <run>
+        <![CDATA[
+        context["current_document"] = context["documents_copy"].pop()
+        if len(context["documents_copy"]) < 1:
+            return "documentloopend"
+        else:
+            return "documentloopstart"
+        ]]>
+    </run>
+  </goto>
+  <say label="documentloopend">
+        <consult-llm>
+            <chatml role="system">
+            You are a pharmaceutical assistant who answers a patient's basic questions
+            about their prescriptions.
+            Here is one of the patient's prescription handouts to help the patient answer their question:
+            <context>current_document</context>
+            </chatml>
+            <chatml role="question">
+            <last-user-statement/>
+            </chatml>
+            <chatml role="system">
+            State "From looking at the documents your clinician provided you on {{topic}}, ...", and then, if it contains helpful information, your answer, otherwise, simply state
+            with brief language you have finished reading it. Then state that you have finished reviewing their documents.
+            If the user asks a question about dosages, or any other questions that require a calculation, 
+            answer that you are not able to preform calculations and will not be able to answer this question, and instead say:
+            "Dosaging is critical to patient safety, please direct your dosage questions to your physician rather than me."
+            Give complete answers.
+            Refer to medications in plain terms a layman would understand, instead of
+            the detailed names they are given in the patient's chart.
+            Answer the patients question completely using 6th grade level English to the best of your ability. Always refer
+            to your patient in the second person. Be brief.  Refer to medications in plain terms a layman would understand, instead of
+            the detailed names they are given in the patient's chart.
+            </chatml>
+        </consult-llm>
+    </say>
+    <goto>restart</goto>
+  <goodbye label="end">
+    Thanks for talking to me. I hope my answers were helpful to you.
+  </goodbye>
+</dialogtree>

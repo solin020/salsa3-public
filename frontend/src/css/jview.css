@@ -1,0 +1,11 @@
+.j_icont {
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+.j_imain{
+    grid-row: 1 / 2;
+    max-width:100%;
+}
+.j_idelete{
+    grid-row: 2 / 3;
+}

@@ -1,0 +1,7 @@
+{
+  "name": "SALSA",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}

@@ -1,0 +1,81 @@
+<html>
+    <body>
+        <form id="uploadform">
+            <label for="filewidget"> Upload Response zip archive:</label>
+            <input name="filewidget" id="filewidget" type="file"/>
+            <br/>
+            <label for="responsecode"> Response Code:</label>
+            <input name="responsecode" id="responsecode" type="text">
+            <br/>
+            <button type="submit">Submit form</button>
+            </body>
+        </form>
+    </body>
+    <script src="/salsa/device/client/openpgp.js"></script>
+    <script>
+        const upload_form = document.getElementById("uploadform")
+        const file_ipt = document.getElementById("filewidget")
+        const response_code = document.getElementById("responsecode")
+        const public_key_armored = `-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+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
+=qexq
+-----END PGP PUBLIC KEY BLOCK-----`;
+        async function upload_encrypt(e){
+            const publicKey = await openpgp.readKey({
+                armoredKey: public_key_armored
+            })
+            const message = await openpgp.createMessage({
+                binary: new Uint8Array(await file_ipt.files[0].arrayBuffer())
+            })
+            const encrypted = await openpgp.encrypt({
+                message,
+                encryptionKeys: publicKey,
+                format: 'binary'
+            })
+            const fd = new FormData()
+            fd.append('upload_zip_pgp', new Blob([encrypted.buffer]))
+            fetch(`/salsa/device/api/upload-response-file?response_code=${response_code.value}`, {
+                method: 'POST',
+                body: fd,
+            }).then(r => {console.log('upload'); e.preventDefault()})
+        }
+        upload_form.addEventListener('submit', async(e) => {e.preventDefault(); await upload_encrypt(e)})
+    </script>
+</html>

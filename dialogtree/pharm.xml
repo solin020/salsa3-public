@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dialogtree SYSTEM "/home/solin020/anise/Dialogtree_phonebot/dialogtree_phonebot/dialogtree/dialogtree.dtd">
+<dialogtree>
+  <branch destinationname="start">
+    <userquestion>
+      Hi! I can answer questions about your prescriptions. 
+    </userquestion>
+    <errorprompt>
+&lt;|im_start|&gt;system
+You are a pharmaceutical assistant who answers a patient's basic questions
+about the prescription medications they are on. They have
+asked you a question irrelevant to their prescription medications.
+Politely explain that you can only answer questions relating
+to their prescription medications.
+&lt;|im_start|&gt;question
+<response/>
+&lt;|im_start|&gt;answer
+    </errorprompt>
+    <answerparse>
+&lt;|im_start|&gt;system
+You are a pharmaceutical assistant who answers a patient's basic questions
+about the prescription medications they are on, listed in their chart here:
+<context key="prescriptions"/>
+If the patient asked a basic question about what their prescriptions are
+or how to take them, reply "basic". If the patient instead asked
+a more advanced question about safety or side effects that would require
+consulting the documents their clinician has provided them, reply "documents". 
+If answering the question would require some calculations, reply "calculations".
+If the question pertains to pets, reply "pets".
+Otherwise, reply "other". Reply with only one word.
+&lt;|im_start|&gt;question
+<response/>
+&lt;|im_start|&gt;answer
+    </answerparse>
+    <jump answer="basic documents pets">
+      <![CDATA[
+      context["last_question"] = response
+      return answer
+      ]]>
+    </jump>
+      <jump answer="calculations" nextdestination="nomath"/>
+  </branch>
+  <branch destinationname="restart">
+    <userquestion>
+      Do you have any other questions for me?
+    </userquestion>
+    <errorprompt>
+&lt;|im_start|&gt;system
+You are a pharmaceutical assistant who answers a patient's basic questions
+about the prescription medications they are on. They have
+asked you a question irrelevant to their prescription medications.
+Politely explain that you can only answer questions relating
+to their prescription medications.
+&lt;|im_start|&gt;question
+<response/>
+&lt;|im_start|&gt;answer
+    </errorprompt>
+    <answerparse>
+&lt;|im_start|&gt;system
+You are a pharmaceutical assistant who answers a patient's basic questions
+about the prescription medications they are on, listed in their chart here:
+<context key="prescriptions"/>
+If the patient asked a basic question about what their prescriptions are
+or how to take them, reply "basic". If the patient instead asked
+a more advanced question about safety or side effects that would require
+consulting the documents their clinician has provided them, reply "documents".
+If answering the question would require some calculations, reply "calculations".
+If the patient said something like goodbye or that they don't have any other questions,
+say "goodbye".
+Otherwise, reply "other". Reply with only one word.
+&lt;|im_start|&gt;question
+<response/>
+&lt;|im_start|&gt;answer
+    </answerparse>
+    <jump answer="basic documents">
+      <![CDATA[
+      context["last_question"] = response
+      return answer
+      ]]>
+    </jump>
+    <jump answer="goodbye" nextdestination="end"/>
+    <jump answer="calculations" nextdestination="nomath"/>
+  </branch>
+  <state destinationname="nomath" nextdestination="restart">
+Unfortuntely, I am unable to make accurate mathematical calculations and I can't help with questions which require them.
+  </state>
+  <llmquestion-direct destinationname="basic" nextdestination="restart">
+&lt;|im_start|&gt;system
+You are a pharmaceutical assistant who answers a patient's basic questions
+about the prescription medications they are on, listed in their chart here:
+<context key="prescriptions"/>
+
+&lt;|im_start|&gt;question
+<context key="last_question"/>
+&lt;|im_start|&gt;system
+Answer the patients question using 6th grade level English to the best of your ability. Always refer
+to your patient in the second person. Be brief. If the user asks a question about dosages, 
+or any other questions that require a calculation, 
+answer that you are not able to preform calculations and will not be able to answer this question, and instead say:
+"Dosaging is critical to patient safety, please direct your dosage questions to your physician rather than me."
+Refer to medications in plain terms a layman would understand, instead of
+the detailed names they are given in the patient's chart.
+&lt;|im_start|&gt;answer
+  </llmquestion-direct>
+  <state destinationname="documents" nextdestination="documentloopend">
+I will read through the documents your provider has uploaded to your portal to help answer your question. 
+Please be patient, as this takes a while.
+    <code>
+      <![CDATA[
+      context["documents_copy"] = [d for d in context["documents"]]
+      context["current_document"] = context["documents_copy"].pop()
+      if len(context["documents_copy"]) < 1:
+          return "documentloopend"
+      else:
+          return "documentloopstart"
+      ]]>
+    </code>
+  </state>
+  <llmquestion-direct destinationname="documentloopstart" nextdestination="documentloopend">
+&lt;|im_start|&gt;system
+You are a pharmaceutical assistant who answers a patient's basic questions
+about the prescriptions.
+Here is one of the patient's prescription handouts to help the patient answer their question:
+<context key="current_document"/>
+&lt;|im_start|&gt;question
+<context key="last_question"/>
+&lt;|im_start|&gt;system
+State "From looking at the documents your clinician provided you on {{topic}}, ...", and then, if it contains helpful information, your answer, otherwise, simply state
+with brief language you have finished reading it. Then state that you will continue reviewing
+their documents. 
+If the user asks a question about dosages, or any other questions that require a calculation, 
+answer that you are not able to preform calculations and will not be able to answer this question, and instead say:
+"Dosaging is critical to patient safety, please direct your dosage questions to your physician rather than me."
+Give complete answers.
+Refer to medications in plain terms a layman would understand, instead of
+the detailed names they are given in the patient's chart.
+Answer the patients question completely using 6th grade level English to the best of your ability. Always refer
+to your patient in the second person. Be brief. Refer to medications in plain terms a layman would understand, instead of
+the detailed names they are given in the patient's chart.
+&lt;|im_start|&gt;answer
+    <code>
+      <![CDATA[
+      context["current_document"] = context["documents_copy"].pop()
+      if len(context["documents_copy"]) < 1:
+          return "documentloopend"
+      else:
+          return "documentloopstart"
+      ]]>
+    </code>
+  </llmquestion-direct>
+    <llmquestion-direct destinationname="documentloopend" nextdestination="restart">
+&lt;|im_start|&gt;system
+You are a pharmaceutical assistant who answers a patient's basic questions
+about their prescriptions.
+Here is one of the patient's prescription handouts to help the patient answer their question:
+<context key="current_document"/>
+&lt;|im_start|&gt;question
+<context key="last_question"/>
+&lt;|im_start|&gt;system
+State "From looking at the documents your clinician provided you on {{topic}}, ...", and then, if it contains helpful information, your answer, otherwise, simply state
+with brief language you have finished reading it. Then state that you have finished reviewing their documents.
+If the user asks a question about dosages, or any other questions that require a calculation, 
+answer that you are not able to preform calculations and will not be able to answer this question, and instead say:
+"Dosaging is critical to patient safety, please direct your dosage questions to your physician rather than me."
+Give complete answers.
+Refer to medications in plain terms a layman would understand, instead of
+the detailed names they are given in the patient's chart.
+Answer the patients question completely using 6th grade level English to the best of your ability. Always refer
+to your patient in the second person. Be brief.  Refer to medications in plain terms a layman would understand, instead of
+the detailed names they are given in the patient's chart.
+&lt;|im_start|&gt;answer
+  </llmquestion-direct>
+  <branch destinationname="pets">
+    <userquestion>
+        Hi! I am your pet purchasing assistant. 
+        Are you interested in purchasing a cat or a dog?
+    </userquestion>
+    <errorprompt>
+        Explain to the user who just replied with this:
+          <response/> 
+
+        to this question:
+          <backprompt/>
+
+        that you only know how to answer questions
+        about advising them about cat or dog purchases and ask them if they want a cat or a dog.
+    </errorprompt>
+    <answerparse>
+        Did the person who answered this:
+          <response/>
+
+        to this question:
+          <backprompt/>
+
+        want a cat, a dog, or something else?
+        If cat, respond "cat". If dog, respond "dog". If anything else, respond "other".
+        Say only one word.
+    </answerparse>
+    <jump answer="cat dog">
+      <![CDATA[
+      context["animal"] = answer
+      if answer == "cat":
+          with open("dialogtree_phonebot/dialogtree/cats.txt") as f:
+             context["breedinfo"] = f.read()
+          return "catbreed"
+      elif answer == "dog":
+          with open("dialogtree_phonebot/dialogtree/dogs.txt") as f:
+              context["breedinfo"] = f.read()
+          return "dogbreed"
+      ]]>
+    </jump>
+  </branch>
+  <state destinationname="catbreed" nextdestination="allergy">
+    You have selected cats.
+  </state>
+  <branch destinationname="allergy">
+    <userquestion>
+        Are you allergic to <context key="animal"/>s?
+    </userquestion>
+    <errorprompt>
+        Explain to the user who just replied with this:
+          <response/>
+
+        to this question:
+          <backprompt/>
+
+        that you would like the answer to the preceding question.
+    </errorprompt>
+    <answerparse>
+        You asked the user this:
+
+        <backprompt/>
+
+        And they replied with this:
+
+        <response/>
+
+        Tell me if the user said they were allergic to <context key="animal"/>s or not? 
+        If yes reply "allergic", if no reply "no", otherwise reply "other". Say only one word.
+    </answerparse>
+    <jump answer="allergic no" nextdestination="indoororoutdoor">
+      <![CDATA[
+      if answer=="allergic":
+          context["allergy"] = answer
+      else:
+          context["allergy"] = "not allergic"
+      ]]>
+    </jump>
+  </branch>
+  <branch destinationname="indoororoutdoor">
+    <userquestion>
+        Do you have space for your <context key="animal"/> to roam?
+    </userquestion>
+    <errorprompt>
+        Explain to the user who just replied with this:
+          <response/>
+
+        to this question:
+          <backprompt/>
+
+        that you would like the answer to the preceding question.
+    </errorprompt>
+    <answerparse>
+      You asked the user this:
+
+      <backprompt/>
+
+      And the user replied with this:
+
+      <response/>
+
+      Tell me if the user said they had outdoor space for a pet to roam.
+      If they said they did reply "outdoor", if no reply "indoor", otherwise reply "other". Say only one word.
+    </answerparse>
+    <jump answer="indoor outdoor" nextdestination="directorindirect">
+      <![CDATA[
+      context["livingspace"] = answer
+      ]]>
+    </jump>
+  </branch>
+  <branch destinationname="directorindirect">
+    <userquestion>
+        Do you like your questions direct or do you prefer to beat around the bush?
+    </userquestion>
+    <errorprompt>
+        Explain to the user who just replied with this:
+          <response/>
+
+        to this question:
+          <backprompt/>
+
+        that you would like the answer to the preceding question.
+    </errorprompt>
+    <answerparse>
+      You asked the user this:
+
+      <backprompt/>
+
+      And the user replied with this:
+
+      <response/>
+
+      Tell me if the user said if they like their questions direct or indirect. If direct, reply "direct",
+      if indirect, reply "indirect", and if anything else, reply "other". Use only one word.
+    </answerparse>
+    <jump answer="indirect" nextdestination="recommendbreedindirect"/>
+    <jump answer="direct" nextdestination="recommendbreeddirect"/>
+  </branch>
+  <llmquestion-direct destinationname="recommendbreeddirect" nextdestination="end">
+    Using the information on breeds of <context key="animal"/> provided here:
+    
+    <context key="breedinfo"/> 
+
+    recommend a breed of dog to the user, given that they are <context key="allergy"/> to <context key="animal"/>
+    and have <context key="livingspace"/> space for the animal. 
+  </llmquestion-direct>
+  <llmquestion-indirect destinationname="recommendbreedindirect" nextdestination="end">
+    <userquestion>
+      I am ready to recommend a breed of <context key="animal"/> to you now. Ask me for a recommendation.
+    </userquestion>
+    <answerparse>
+      Using the information on breeds of <context key="animal"/> provided here:
+          <context key="breedinfo"/> 
+
+      answer this users question, given that they are <context key="allergy"/> to <context key="animal"/>
+      and have <context key="livingspace"/> space for the animal. 
+    </answerparse>
+  </llmquestion-indirect>
+  <state destinationname="dogbreed" nextdestination="allergy">
+    You have selected dogs.
+  </state>
+  <goodbye destinationname="end">
+    Thanks for talking to me. I hope my answers were helpful to you.
+  </goodbye>
+</dialogtree>
